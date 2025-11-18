@@ -629,15 +629,25 @@ npm run dev
    ```
 
 3. **Goの依存関係の問題**
+
+   **重要**: 現在のDockerfileは、ビルド時に自動的に`go.sum`を生成します。
+
    ```bash
-   # backendディレクトリでgo.sumを再生成
+   # ローカルでgo.sumを生成する場合（オプション）
    cd backend
    go mod tidy
    go mod verify
+   git add go.sum
+   git commit -m "Add go.sum file"
 
    # その後、再度Dockerビルド
    docker-compose build backend
    ```
+
+   **注意**: Dockerfileは`go mod tidy`を実行するため、`go.sum`をリポジトリに
+   含めなくてもビルドは成功しますが、ベストプラクティスとしては`go.sum`を
+   リポジトリに含めることが推奨されます。これにより、ビルドの再現性と
+   セキュリティが向上します。
 
 4. **ネットワークの問題**
    - プロキシやファイアウォールの設定を確認

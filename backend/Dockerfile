@@ -9,11 +9,14 @@ WORKDIR /app
 # Copy go mod files
 COPY go.mod ./
 
-# Download dependencies and create go.sum if it doesn't exist
-RUN go mod download && go mod verify
-
-# Copy source code
+# Copy source code (needed for go mod tidy to work properly)
 COPY . .
+
+# Download dependencies and generate go.sum
+RUN echo "Downloading dependencies..." && \
+    go mod download && \
+    go mod tidy && \
+    echo "Dependencies downloaded successfully"
 
 # Build the application with verbose output
 RUN echo "Building application..." && \
