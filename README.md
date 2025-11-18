@@ -408,8 +408,249 @@
 
 | 方針 | 効果 (競合優位性) |
 | :--- | :--- |
-| ① AIが“自分専用”教材を作る | 学習負荷が激減 (競合Aの弱点を克服) |
+| ① AIが"自分専用"教材を作る | 学習負荷が激減 (競合Aの弱点を克服) |
 | ② 実際のチャートやニュースで学ぶ | 実践感が楽しい (競合A, Cの弱点を克服) |
-| ③ AIコーチが“個別フィードバック” | 伸びを実感できる (競合Bの弱点を克服) |
+| ③ AIコーチが"個別フィードバック" | 伸びを実感できる (競合Bの弱点を克服) |
 | ④ 1日3分の習慣レッスン | 挫折しにくい (継続率の向上) |
 | ⑤ トレード日記自動生成 | 成長の可視化 (競合Dの弱点を克服) |
+
+---
+
+## 7. セットアップと実行手順
+
+### 前提条件
+
+以下のソフトウェアがインストールされている必要があります：
+
+- Docker & Docker Compose
+- Git
+- （オプション）Go 1.21+、Node.js 18+（ローカル開発の場合）
+
+### 7.1. Dockerを使用した起動（推奨）
+
+#### 手順1: リポジトリをクローン
+
+```bash
+git clone https://github.com/GenkiNakashima/moneyst.git
+cd moneyst
+```
+
+#### 手順2: 環境変数ファイルを作成
+
+```bash
+# ルートディレクトリに.envファイルを作成（オプション）
+cp .env.example .env
+
+# バックエンドディレクトリに.envファイルを作成
+cp backend/.env.example backend/.env
+```
+
+**注意:** `.env`ファイル内の`JWT_SECRET`は本番環境では必ず変更してください。
+
+#### 手順3: Dockerコンテナを起動
+
+```bash
+# すべてのサービス（PostgreSQL, Backend, Frontend）を起動
+docker-compose up -d
+
+# ログを確認
+docker-compose logs -f
+```
+
+#### 手順4: アプリケーションにアクセス
+
+- **フロントエンド:** http://localhost:3000
+- **バックエンドAPI:** http://localhost:8080
+- **データベース:** localhost:5432
+
+#### サービスの停止
+
+```bash
+# サービスを停止
+docker-compose down
+
+# データベースのボリュームも削除する場合
+docker-compose down -v
+```
+
+### 7.2. ローカル開発環境での起動
+
+#### A. データベース（PostgreSQL）の起動
+
+```bash
+# Dockerでデータベースのみ起動
+docker-compose up -d postgres
+
+# または、ローカルのPostgreSQLを使用する場合は、データベースを作成
+createdb moneyst
+```
+
+#### B. バックエンド（Go）の起動
+
+```bash
+cd backend
+
+# 依存関係をインストール
+go mod download
+
+# 環境変数を設定（.envファイルを作成）
+cp .env.example .env
+
+# サーバーを起動
+go run main.go
+```
+
+バックエンドは http://localhost:8080 で起動します。
+
+#### C. フロントエンド（React + Vite）の起動
+
+```bash
+cd frontend
+
+# 依存関係をインストール
+npm install
+
+# 開発サーバーを起動
+npm run dev
+```
+
+フロントエンドは http://localhost:3000 で起動します。
+
+### 7.3. 初回セットアップ（ユーザー登録）
+
+1. ブラウザで http://localhost:3000 を開く
+2. 「新規登録」ページでアカウントを作成
+3. ログイン後、ダッシュボードが表示されます
+
+### 7.4. データベースマイグレーション（手動実行の場合）
+
+Dockerを使用している場合、マイグレーションは自動的に実行されます。
+手動で実行する場合：
+
+```bash
+# PostgreSQLに接続
+psql -h localhost -U postgres -d moneyst
+
+# マイグレーションファイルを実行
+\i backend/migrations/001_create_initial_schema.sql
+```
+
+または、GORMのAutoMigrate機能により、アプリケーション起動時に自動的にテーブルが作成されます。
+
+### 7.5. API仕様（主要エンドポイント）
+
+#### 認証
+
+- `POST /api/auth/register` - ユーザー登録
+- `POST /api/auth/login` - ログイン（JWTトークン取得）
+- `GET /api/auth/me` - 認証済みユーザー情報取得
+
+#### ユーザー
+
+- `GET /api/users/me/profile` - プロファイル取得
+- `PUT /api/users/me/profile` - プロファイル更新
+
+#### カリキュラム
+
+- `GET /api/curriculums/me` - パーソナルカリキュラム取得
+- `POST /api/curriculums/:id/complete` - カリキュラム完了
+
+#### デイリーレッスン
+
+- `GET /api/lessons/daily` - 今日のレッスン取得
+- `POST /api/lessons/:id/complete` - レッスン完了
+
+#### シミュレーショントレード
+
+- `POST /api/simulations/trades` - トレード実行
+- `GET /api/simulations/trades` - トレード履歴取得
+- `POST /api/simulations/trades/:id/close` - ポジションクローズ
+
+#### トレード日記
+
+- `GET /api/simulations/diaries` - トレード日記一覧取得
+- `POST /api/simulations/trades/:id/diary` - トレード日記生成
+- `PUT /api/simulations/diaries/:id` - トレード日記のメモ更新
+
+#### ニュース
+
+- `GET /api/news/personalized` - パーソナライズドニュース取得
+- `POST /api/news/:id/read` - ニュース既読マーク
+
+### 7.6. トラブルシューティング
+
+#### ポートがすでに使用されている
+
+```bash
+# 使用中のポートを確認
+sudo lsof -i :3000
+sudo lsof -i :8080
+sudo lsof -i :5432
+
+# プロセスを終了するか、docker-compose.ymlのポート番号を変更
+```
+
+#### データベース接続エラー
+
+- PostgreSQLコンテナが起動しているか確認: `docker-compose ps`
+- データベース接続情報（ホスト、ポート、ユーザー名、パスワード）が正しいか確認
+- バックエンドの`.env`ファイルを確認
+
+#### フロントエンドが起動しない
+
+```bash
+# node_modulesを削除して再インストール
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+### 7.7. 本番デプロイ
+
+本番環境にデプロイする場合は、以下の点に注意してください：
+
+1. **環境変数の設定**
+   - `JWT_SECRET`を強固なランダム文字列に変更
+   - データベース認証情報を変更
+   - CORS設定を本番ドメインに限定
+
+2. **フロントエンドのビルド**
+   ```bash
+   cd frontend
+   npm run build
+   # dist/ディレクトリにビルド成果物が生成される
+   ```
+
+3. **バックエンドのビルド**
+   ```bash
+   cd backend
+   go build -o main .
+   ```
+
+4. **HTTPS化**
+   - Nginx や Caddy などのリバースプロキシを使用
+   - Let's Encrypt で SSL証明書を取得
+
+5. **データベースのバックアップ**
+   - 定期的にPostgreSQLのバックアップを取得
+
+### 7.8. 今後の実装予定
+
+以下の機能は現在プレースホルダーであり、今後実装予定です：
+
+- **AI統合**: OpenAI API / Gemini APIを使用したパーソナライズ機能
+- **チャート機能**: TradingView Lightweight Chartsの統合
+- **ニュースAPI**: 外部ニュースAPIからのリアルタイムニュース取得
+- **リスク分析**: 暗号資産のボラティリティとリスク指標の可視化
+- **通知機能**: WebSocketを使用したリアルタイム通知
+
+---
+
+## 8. ライセンス
+
+This project is licensed under the MIT License.
+
+## 9. お問い合わせ
+
+質問や提案がある場合は、GitHubのIssuesまでお願いします。
