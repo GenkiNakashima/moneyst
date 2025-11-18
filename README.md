@@ -606,6 +606,49 @@ npm install
 npm run dev
 ```
 
+#### Dockerビルドエラーが発生する
+
+**症状**: `go build` が失敗する、または依存関係のダウンロードエラーが発生する
+
+**対処法**:
+
+1. **Docker Desktopでビルドログを確認する**
+   - Docker Desktopアプリを開く
+   - 左サイドバーの「Builds」タブをクリック
+   - 失敗したビルドを選択すると詳細なログが表示されます
+   - エラーメッセージの全文を確認できます
+
+2. **コマンドラインで詳細なログを表示**
+   ```bash
+   # ビルドキャッシュをクリアして再ビルド
+   docker-compose build --no-cache --progress=plain backend
+
+   # または個別にビルド
+   cd backend
+   docker build --no-cache --progress=plain -t moneyst-backend .
+   ```
+
+3. **Goの依存関係の問題**
+   ```bash
+   # backendディレクトリでgo.sumを再生成
+   cd backend
+   go mod tidy
+   go mod verify
+
+   # その後、再度Dockerビルド
+   docker-compose build backend
+   ```
+
+4. **ネットワークの問題**
+   - プロキシやファイアウォールの設定を確認
+   - Docker Desktopの設定で「Resources」→「Network」を確認
+   - 必要に応じてDNS設定を変更（例: 8.8.8.8）
+
+5. **マルチステージビルドの確認**
+   - 現在のDockerfileはマルチステージビルドを使用しています
+   - ビルドステージ（builder）とランタイムステージが分離されています
+   - これにより最終イメージのサイズが小さくなり、セキュリティも向上します
+
 ### 7.7. 本番デプロイ
 
 本番環境にデプロイする場合は、以下の点に注意してください：

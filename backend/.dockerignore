@@ -1,0 +1,23 @@
+# Ignore unnecessary files
+.env
+.env.*
+*.log
+tmp/
+*.tmp
+
+# Git files
+.git
+.gitignore
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+*_test.go
