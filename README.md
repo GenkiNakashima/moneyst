@@ -457,6 +457,16 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
+**開発用設定について:**
+- `docker-compose.yml`は開発用に最適化されています
+- バックエンド: ソースコードの変更を反映するため、volumeマウント + `go run`を使用
+- フロントエンド: ホットリロードが有効で、コード変更が自動反映されます
+- 初回起動時やコード変更後は、コンテナの再ビルドが必要な場合があります:
+  ```bash
+  docker-compose build
+  docker-compose up -d
+  ```
+
 #### 手順4: アプリケーションにアクセス
 
 - **フロントエンド:** http://localhost:3000
@@ -598,13 +608,42 @@ sudo lsof -i :5432
 
 #### フロントエンドが起動しない
 
-```bash
-# node_modulesを削除して再インストール
-cd frontend
-rm -rf node_modules package-lock.json
-npm install
-npm run dev
-```
+**症状**: `Vite requires Node.js version 20.19+ or 22.12+`のようなエラーが出る
+
+**原因**: Node.jsのバージョンが古い
+
+**対処法**:
+1. **Docker環境の場合**:
+   - `frontend/Dockerfile`でNode.js 20以上を使用していることを確認
+   - 現在は`node:20-alpine`を使用しています
+   - コンテナを再ビルド:
+     ```bash
+     docker-compose build frontend
+     docker-compose up -d frontend
+     ```
+
+2. **ローカル環境の場合**:
+   ```bash
+   # node_modulesを削除して再インストール
+   cd frontend
+   rm -rf node_modules package-lock.json
+   npm install
+   npm run dev
+   ```
+
+#### バックエンドが起動しない
+
+**症状**: `exec: "go": executable file not found in $PATH`
+
+**原因**: docker-compose.ymlで開発用の設定（`target: builder`）が指定されていない
+
+**対処法**:
+- `docker-compose.yml`のbackendセクションに`target: builder`が含まれていることを確認
+- コンテナを再ビルド:
+  ```bash
+  docker-compose build backend
+  docker-compose up -d backend
+  ```
 
 #### Dockerビルドエラーが発生する
 
