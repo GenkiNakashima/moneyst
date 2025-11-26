@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { BarChart3, BookOpen, TrendingUp, Newspaper, Shield, LogOut } from 'lucide-react';
+import { BarChart3, BookOpen, TrendingUp, Newspaper, Shield, MessageSquare, LogOut } from 'lucide-react';
 
 export const Layout: React.FC = () => {
   const { user, logout } = useAuth();
@@ -19,6 +19,7 @@ export const Layout: React.FC = () => {
     { path: '/app/simulation', label: '模擬トレード', icon: TrendingUp },
     { path: '/app/news', label: 'ニュース', icon: Newspaper },
     { path: '/app/risk', label: 'リスク分析', icon: Shield },
+    { path: '/app/community', label: 'コミュニティ', icon: MessageSquare },
   ];
 
   return (

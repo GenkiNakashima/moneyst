@@ -44,6 +44,16 @@ func SetupRoutes(r *gin.Engine) {
 		// News
 		api.GET("/news/personalized", controllers.GetPersonalizedNews)
 		api.POST("/news/:id/read", controllers.MarkNewsAsRead)
+
+		// Community
+		api.POST("/community/posts", controllers.CreatePost)
+		api.GET("/community/posts", controllers.GetPosts)
+		api.GET("/community/posts/trending", controllers.GetTrendingPosts)
+		api.GET("/community/posts/search", controllers.SearchPosts)
+		api.GET("/community/posts/:id", controllers.GetPost)
+		api.DELETE("/community/posts/:id", controllers.DeletePost)
+		api.POST("/community/posts/:id/replies", controllers.CreateReply)
+		api.POST("/community/posts/:id/like", controllers.ToggleLike)
 	}
 
 	// Health check

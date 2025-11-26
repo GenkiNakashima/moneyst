@@ -48,6 +48,9 @@ func ConnectDatabase() {
 		&models.SimulationTrade{},
 		&models.TradeDiary{},
 		&models.SummarizedNews{},
+		&models.Post{},
+		&models.Reply{},
+		&models.PostLike{},
 	)
 
 	if err != nil {
