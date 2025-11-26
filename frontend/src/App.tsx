@@ -8,6 +8,7 @@ import { LearningPage } from './pages/LearningPage';
 import { SimulationPage } from './pages/SimulationPage';
 import { NewsPage } from './pages/NewsPage';
 import { RiskDashboardPage } from './pages/RiskDashboardPage';
+import { CommunityPage } from './pages/CommunityPage';
 import { Layout } from './components/Layout';
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ function App() {
               <Route path="simulation" element={<SimulationPage />} />
               <Route path="news" element={<NewsPage />} />
               <Route path="risk" element={<RiskDashboardPage />} />
+              <Route path="community" element={<CommunityPage />} />
               <Route index element={<Navigate to="/app/dashboard" replace />} />
             </Route>
 

@@ -30,11 +30,14 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	// Create user
+	// Create user with default profile values
 	user := models.User{
-		Email:          req.Email,
-		HashedPassword: hashedPassword,
-		Username:       req.Username,
+		Email:                req.Email,
+		HashedPassword:       hashedPassword,
+		Username:             req.Username,
+		RiskTolerance:        "medium",
+		LearningStyle:        "text",
+		InvestmentExperience: "none",
 	}
 
 	if err := config.DB.Create(&user).Error; err != nil {
